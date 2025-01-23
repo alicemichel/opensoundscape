@@ -1656,6 +1656,40 @@ def _audio_from_file_handler(
     else:
         metadata = None
 
+    #######################################################
+    
+    barlt = metadata['artist'] == 'Frontier Labs'
+
+    if barlt == True:
+        
+        #extract/format true/gps start date/time
+        file_start_date_time = metadata["title"][1:23] 
+        start_datetime = datetime.datetime.strptime(file_start_date_time,'%Y%m%dT%H%M%S.%f')
+
+        #extract true/gps start time
+        start = metadata["title"][10:23]
+        hour = float(start[0:2]); min = float(start[2:4]); sec = float(start[4:])
+        gps_start = hour*60*60 + min*60 + sec
+        end = metadata["title"][39:52]
+        hour_end = float(end[0:2]); min_end = float(end[2:4]); sec_end = float(end[4:])
+        gps_end = hour_end*60*60 + min_end*60 + sec_end
+        
+        #measure true/gps time duration
+        gps_duration = gps_end - gps_start
+
+        #measure file sample time duration
+        file_duration = librosa.get_duration(path=path)
+
+        #calculate true sampling rate, file internal relative to "real" GPS time
+        computed_sample_rate = file_duration * metadata['samplerate'] / gps_duration #n_samples/(end_seconds-beginning_seconds)
+        # or librosa.get_samplerate(path=path)?
+
+        #update metadata
+        metadata['recording_start_time'] = start_datetime
+        metadata['true_sample_rate'] = computed_sample_rate
+
+    #######################################################
+
     ## Determine start time / offset ##
     if start_timestamp is not None:
         # user should have provied a localized timestamp as the start_timestamp
@@ -1686,6 +1720,24 @@ def _audio_from_file_handler(
 
     elif offset is None:  # default offset is 0
         offset = 0
+
+    #########################################################
+    #modify offset based on true vs nominal sample_rate
+
+    if barlt == True:
+        print(offset)
+        offset = offset * metadata['true_sample_rate'] / metadata['samplerate']
+        print(offset)
+    #true_sample_rate = n_samples / real_time
+    #offset = offset * true_sample_rate / sample_rate
+
+    #########################################################
+
+    # samples_to_load = duration * true_sample_rate
+    # duration_to_load_wit_librosa = samples_to_load / sample_rate
+    # samples,sr= librosa.load()....
+    # # 
+    # new_samples = np.resample(samples,target_new_times)
 
     ## Load samples ##
     warnings.filterwarnings("ignore")
@@ -1728,13 +1780,13 @@ def _audio_from_file_handler(
     if metadata is not None:
         # update the duration because we may have only loaded
         # a piece of the entire audio file.
-        metadata["duration"] = len(samples) / sr
+        metadata["duration"] = len(samples) / sr #should this be the true sr???
 
         # we sum to mono when we load with librosa
         metadata["channels"] = 1
 
         # update the sample rate in metadata
-        metadata["samplerate"] = sr
+        metadata["samplerate"] = sr #can't change this...right???
 
         # if we loaded part we don't know the file size anymore
         if offset != 0 or duration is not None:
@@ -1745,6 +1797,11 @@ def _audio_from_file_handler(
             # timedelta doesn't like np types, fix issue #928
             offset = cast_np_to_native(offset)
             metadata["recording_start_time"] += datetime.timedelta(seconds=offset)
+
+        #########################################################
+        #if barlt == True:
+            #sr = true_sample_rate
+        #########################################################
 
     return cls(samples, sr, resample_type=resample_type, metadata=metadata)
 
