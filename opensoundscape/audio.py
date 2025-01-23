@@ -201,6 +201,9 @@ class Audio:
         duration=None,
         start_timestamp=None,
         out_of_bounds_mode="warn",
+        ################
+        barlt=False,
+        ################
     ):
         """Load audio from files
 
@@ -274,6 +277,9 @@ class Audio:
             duration=duration,
             start_timestamp=start_timestamp,
             out_of_bounds_mode=out_of_bounds_mode,
+            ################
+            barlt=barlt,
+            ################
         )
 
     @classmethod
@@ -1582,6 +1588,9 @@ def _audio_from_file_handler(
     duration=None,
     start_timestamp=None,
     out_of_bounds_mode="warn",
+    ################
+    barlt=False,
+    ################
 ):
     """Load audio from files
 
@@ -1658,7 +1667,7 @@ def _audio_from_file_handler(
 
     #######################################################
     
-    barlt = metadata['artist'] == 'Frontier Labs'
+    #barlt = metadata['artist'] == 'Frontier Labs'
 
     if barlt == True:
         

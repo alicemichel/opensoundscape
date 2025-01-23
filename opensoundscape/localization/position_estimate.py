@@ -122,6 +122,7 @@ class PositionEstimate:
                     offset=start,
                     duration=self.duration + start_offset + end_offset,
                     out_of_bounds_mode="warn",
+                    barlt=True,
                 )
             )
 

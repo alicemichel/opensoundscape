@@ -30,7 +30,7 @@ class GetStartTimestamp:
             if file == self.cached_file:
                 recording_start_dt = self.cached_recording_start_time
             else:
-                recording_start_dt = Audio.from_file(file, duration=0.0001).metadata[
+                recording_start_dt = Audio.from_file(file, duration=0.0001, barlt=True).metadata[
                     "recording_start_time"
                 ]  # TODO: replace with audio.metadata_from_file after merging develop
                 self.cached_file = file

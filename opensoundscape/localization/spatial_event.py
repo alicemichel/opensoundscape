@@ -229,6 +229,7 @@ class SpatialEvent:
             self.receiver_files[0],
             offset=self.receiver_start_time_offsets[0] - self.max_delay,
             duration=extracted_clip_duration,
+            barlt=True,
         )
 
         # make sure the audio clip is of the desired length
@@ -267,6 +268,7 @@ class SpatialEvent:
                 file,
                 offset=self.receiver_start_time_offsets[index] - self.max_delay,
                 duration=extracted_clip_duration,
+                barlt=True,
             )
 
             # catch edge cases where the audio lengths do not match.
