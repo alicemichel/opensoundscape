@@ -1734,9 +1734,9 @@ def _audio_from_file_handler(
     #modify offset based on true vs nominal sample_rate
 
     if barlt == True:
-        print(offset)
+        old_offset = offset
         offset = offset * metadata['true_sample_rate'] / metadata['samplerate']
-        print(offset)
+        print(f'updated time offset based on true sr from {old_offset} to {offset}')
     #true_sample_rate = n_samples / real_time
     #offset = offset * true_sample_rate / sample_rate
 
