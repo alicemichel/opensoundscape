@@ -227,7 +227,7 @@ class SpatialEvent:
         # load audio from desired time period
         reference_audio = Audio.from_file(
             self.receiver_files[0],
-            offset=self.receiver_start_time_offsets[0] - self.max_delay,
+            offset=self.receiver_start_time_offsets[0] - self.max_delay, #### HERE? ####
             duration=extracted_clip_duration,
             barlt=True,
         )
@@ -266,7 +266,7 @@ class SpatialEvent:
             # use specified time offsets to extract the correct audio segment
             audio2 = Audio.from_file(
                 file,
-                offset=self.receiver_start_time_offsets[index] - self.max_delay,
+                offset=self.receiver_start_time_offsets[index] - self.max_delay, #### HERE? ####
                 duration=extracted_clip_duration,
                 barlt=True,
             )

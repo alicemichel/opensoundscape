@@ -626,7 +626,7 @@ def tdoa(
     lag = np.argmax(cc)
 
     # convert lag to time delay
-    tdoa = (lag / sample_rate) - max_delay
+    tdoa = (lag / sample_rate) - max_delay  #### HERE? ####
     max_cc = np.max(cc)
 
     if return_max:
