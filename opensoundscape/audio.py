@@ -1690,8 +1690,8 @@ def _audio_from_file_handler(
         file_duration = librosa.get_duration(path=path)
 
         #calculate true sampling rate, file internal relative to "real" GPS time
-        computed_sample_rate = file_duration * gps_duration / metadata['samplerate'] #n_samples/(end_seconds-beginning_seconds)
-        # or librosa.get_samplerate(path=path)?  ##FLIPPED THIS!!!
+        computed_sample_rate = file_duration * metadata['samplerate'] / gps_duration #n_samples/(end_seconds-beginning_seconds)
+        # or librosa.get_samplerate(path=path)?
 
         #update metadata
         metadata['recording_start_time'] = start_datetime
