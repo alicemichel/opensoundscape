@@ -1756,23 +1756,36 @@ def _audio_from_file_handler(
 
     #########################################################
 
-    # samples_to_load = duration * true_sample_rate
-    # duration_to_load_wit_librosa = samples_to_load / sample_rate    # did we decide this didn't matter?
+    samples_to_load = duration * computed_sample_rate
+    duration_to_load_wit_librosa = samples_to_load / metadata['samplerate']    # did we decide this didn't matter?
     # samples,sr= librosa.load()....
     # # 
-    # new_samples = np.resample(samples,target_new_times)
+    # new_samples = np.resample(samples,target_new_times) # did we decide this didn't matter?
 
     ## Load samples ##
     warnings.filterwarnings("ignore")
-    samples, sr = librosa.load(
-        path,
-        sr=sample_rate,
-        res_type=resample_type,
-        mono=to_mono,
-        offset=offset,
-        duration=duration,
-        dtype=None,
-    )
+
+    if barlt==True:
+        samples, sr = librosa.load(
+            path,
+            sr=sample_rate,
+            res_type=resample_type,
+            mono=to_mono,
+            offset=offset,
+            duration=duration_to_load_wit_librosa,
+            dtype=None,
+        )
+
+    if barlt==False:
+        samples, sr = librosa.load(
+            path,
+            sr=sample_rate,
+            res_type=resample_type,
+            mono=to_mono,
+            offset=offset,
+            duration=duration,
+            dtype=None,
+        )
     # temporary workaround for soundfile issue #349
     # which causes empty sample array if loading float32 from mp3:
     # pass dtype=None, then change it afterwards
