@@ -1736,16 +1736,8 @@ def _audio_from_file_handler(
 
     if barlt == True:
         old_offset = offset
-        offset = old_offset * metadata['true_sample_rate']/metadata['samplerate'] #flipped is wrong I think#
-
-        # because:
-        # old_offset * metadata['samplerate']/ (file_duration * metadata['samplerate'] / gps_duration )
-        # old_offset * gps_duration / file_duration
-        # this gives true/gps time? but that's the opposite of the goal below... 
-        # ah right because we want to put the offset in as the real GPS time then convert to the specific file's time 
-
+        offset = old_offset * metadata['true_sample_rate']/metadata['samplerate']
         print(f'updated time offset based on true sr from {old_offset} to {offset}')
-    # Sam says to get:
     #true_sample_rate = n_samples / real_time
     #true_offset = offset * true_sample_rate / sample_rate
 
@@ -1756,9 +1748,9 @@ def _audio_from_file_handler(
 
     #########################################################
 
-    samples_to_load = duration * computed_sample_rate
-    duration_to_load_wit_librosa = samples_to_load / metadata['samplerate']    # did we decide this didn't matter?
-    # samples,sr= librosa.load()....
+    # samples_to_load = duration * computed_sample_rate
+    # duration_to_load_wit_librosa = samples_to_load / metadata['samplerate']    # did we decide this didn't matter?
+    # # samples,sr= librosa.load()....
     # # 
     # new_samples = np.resample(samples,target_new_times) # did we decide this didn't matter?
 
@@ -1767,28 +1759,30 @@ def _audio_from_file_handler(
     ## Load samples ##
     warnings.filterwarnings("ignore")
 
-    if barlt==True:
-        samples, sr = librosa.load(
-            path,
-            sr=sample_rate,
-            res_type=resample_type,
-            mono=to_mono,
-            offset=offset,
-            duration=duration_to_load_wit_librosa,
-            dtype=None,
-        )
-        #samples = scipy.signal.resample(samples,target_new_times) #probably will mess it up
+    # implementing duration differences causes problems with xcorr and shouldn't matter too much...I thnk
 
-    if barlt==False:
-        samples, sr = librosa.load(
-            path,
-            sr=sample_rate,
-            res_type=resample_type,
-            mono=to_mono,
-            offset=offset,
-            duration=duration,
-            dtype=None,
-        )
+    # if barlt==True:
+    #     samples, sr = librosa.load(
+    #         path,
+    #         sr=sample_rate,
+    #         res_type=resample_type,
+    #         mono=to_mono,
+    #         offset=offset,
+    #         duration=duration_to_load_wit_librosa,
+    #         dtype=None,
+    #     )
+    #     #samples = scipy.signal.resample(samples,target_new_times) #probably will mess it up
+
+    #if barlt==False:
+    samples, sr = librosa.load(
+        path,
+        sr=sample_rate,
+        res_type=resample_type,
+        mono=to_mono,
+        offset=offset,
+        duration=duration,
+        dtype=None,
+    )
     # temporary workaround for soundfile issue #349
     # which causes empty sample array if loading float32 from mp3:
     # pass dtype=None, then change it afterwards
