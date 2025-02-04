@@ -1827,12 +1827,12 @@ def _audio_from_file_handler(
         # if the offset > 0, we need to update the timestamp
         if "recording_start_time" in metadata and offset > 0:
             # timedelta doesn't like np types, fix issue #928
-            old_offset = cast_np_to_native(old_offset)
-            metadata["recording_start_time"] += datetime.timedelta(seconds=old_offset) 
+            offset = cast_np_to_native(offset)
+            metadata["recording_start_time"] += datetime.timedelta(seconds=offset) 
             #records the true/gps time offset + file_start_time in the metadata
             #the audio loading is based on the new, nominal/computed offset
             #but it corresponds to this "true" time
-            print(f'updated metadata start time based on {old_offset} s offset')
+            print(f'updated metadata start time based on adjusted offset, {offset}s')
 
 
         #########################################################
