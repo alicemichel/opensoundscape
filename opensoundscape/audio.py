@@ -1836,8 +1836,8 @@ def _audio_from_file_handler(
 
 
         #########################################################
-        # if barlt == True:
-        #     sr = computed_sample_rate
+        if barlt == True:
+            sr = computed_sample_rate
         #########################################################
 
     return cls(samples, sr, resample_type=resample_type, metadata=metadata)
