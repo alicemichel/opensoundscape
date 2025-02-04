@@ -1736,7 +1736,7 @@ def _audio_from_file_handler(
 
     if barlt == True:
         old_offset = offset #true offset, as given
-        offset = old_offset * metadata['true_sample_rate']/metadata['samplerate'] #nominal offset, for ARU file
+        offset = old_offset * metadata['samplerate']/metadata['true_sample_rate'] #nominal offset, for ARU file
     #true_sample_rate = n_samples / real_time
     #offset * true_sample_rate / sample_rate
     # which means:
