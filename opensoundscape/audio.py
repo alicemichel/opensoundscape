@@ -1737,7 +1737,6 @@ def _audio_from_file_handler(
     if barlt == True:
         old_offset = offset #true offset, as given
         offset = old_offset * file_duration / gps_duration #nominal offset, for ARU file
-        print(f'updated time offset based on true sr from {old_offset} to {offset}')
     #true_sample_rate = n_samples / real_time
     #offset * true_sample_rate / sample_rate
     # which means:
@@ -1833,6 +1832,8 @@ def _audio_from_file_handler(
             #records the true/gps time offset + file_start_time in the metadata
             #the audio loading is based on the new, nominal/computed offset
             #but it corresponds to this "true" time
+            print(f'updated metadata start time based on {old_offset} s offset')
+
 
         #########################################################
         # if barlt == True:
