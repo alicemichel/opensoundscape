@@ -1762,6 +1762,8 @@ def _audio_from_file_handler(
     # # 
     # new_samples = np.resample(samples,target_new_times) # did we decide this didn't matter?
 
+    target_new_times = duration * metadata['samplerate'] #this Alice added - can't be right...
+
     ## Load samples ##
     warnings.filterwarnings("ignore")
 
@@ -1775,6 +1777,7 @@ def _audio_from_file_handler(
             duration=duration_to_load_wit_librosa,
             dtype=None,
         )
+        samples = np.resample(samples,target_new_times) #probably will mess it up
 
     if barlt==False:
         samples, sr = librosa.load(
