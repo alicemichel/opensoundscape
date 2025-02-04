@@ -1757,7 +1757,7 @@ def _audio_from_file_handler(
     #########################################################
 
     # samples_to_load = duration * true_sample_rate
-    # duration_to_load_wit_librosa = samples_to_load / sample_rate
+    # duration_to_load_wit_librosa = samples_to_load / sample_rate    # did we decide this didn't matter?
     # samples,sr= librosa.load()....
     # # 
     # new_samples = np.resample(samples,target_new_times)
@@ -1822,8 +1822,8 @@ def _audio_from_file_handler(
             metadata["recording_start_time"] += datetime.timedelta(seconds=offset)
 
         #########################################################
-        #if barlt == True:
-            #sr = true_sample_rate
+        if barlt == True:
+            sr = computed_sample_rate
         #########################################################
 
     return cls(samples, sr, resample_type=resample_type, metadata=metadata)
