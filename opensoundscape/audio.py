@@ -1735,54 +1735,54 @@ def _audio_from_file_handler(
     #modify offset based on true vs nominal sample_rate
 
     if barlt == True:
-        old_offset = offset
-        offset = old_offset * metadata['true_sample_rate']/metadata['samplerate']
+        old_offset = offset #true offset, as given
+        offset = old_offset * file_duration / gps_duration #nominal offset, for ARU file
         print(f'updated time offset based on true sr from {old_offset} to {offset}')
     #true_sample_rate = n_samples / real_time
-    #true_offset = offset * true_sample_rate / sample_rate
-
+    #offset * true_sample_rate / sample_rate
     # which means:
-    #true_offset = offset * n_samples / real_time / sample_rate
-    #true_offset = offset * file_duration * sample_rate / real_time / sample_rate
-    #true_offset = offset * file_duration / real_time
+    #offset * n_samples / real_time / sample_rate
+    #offset * file_duration * sample_rate / real_time / sample_rate
+    #offset * file_duration / real_time 
+    # --> gets us from real offset in gps time e.g. from ref ARU to the time of the specific ARU
 
     #########################################################
-
-    # samples_to_load = duration * computed_sample_rate
-    # duration_to_load_wit_librosa = samples_to_load / metadata['samplerate']    # did we decide this didn't matter?
-    # # samples,sr= librosa.load()....
-    # # 
-    # new_samples = np.resample(samples,target_new_times) # did we decide this didn't matter?
-
-    #target_new_times = duration * metadata['samplerate'] #this Alice added - can't be right...
 
     ## Load samples ##
     warnings.filterwarnings("ignore")
 
-    # implementing duration differences causes problems with xcorr and shouldn't matter too much...I thnk
+    # implementing duration differences causes problems with xcorr and shouldn't matter too much...I think...
+    samples_to_load = duration # * computed_sample_rate
+    duration_to_load_wit_librosa = samples_to_load #/ metadata['samplerate']    # did we decide this didn't matter?
+    #target_new_times = duration * metadata['samplerate']
+    offset_to_load_wit_librosa = offset #should be nominal bc we're not changing the sample_rate in metadata
 
-    # if barlt==True:
-    #     samples, sr = librosa.load(
-    #         path,
-    #         sr=sample_rate,
-    #         res_type=resample_type,
-    #         mono=to_mono,
-    #         offset=offset,
-    #         duration=duration_to_load_wit_librosa,
-    #         dtype=None,
-    #     )
-    #     #samples = scipy.signal.resample(samples,target_new_times) #probably will mess it up
+    # now it's not different, but keeping it separate so duration alteration could be implemented
+    if barlt==True:
+        samples, sr = librosa.load(
+            path,
+            sr=sample_rate,
+            res_type=resample_type,
+            mono=to_mono,
+            offset=offset_to_load_wit_librosa,
+            duration=duration_to_load_wit_librosa,
+            dtype=None,
+        )
+        print(f'loaded at offset {offset}')
+        #samples = scipy.signal.resample(samples,target_new_times) #not np
+        #new_samples = np.resample(samples,target_new_times) # did we decide this didn't matter?
 
-    #if barlt==False:
-    samples, sr = librosa.load(
-        path,
-        sr=sample_rate,
-        res_type=resample_type,
-        mono=to_mono,
-        offset=offset,
-        duration=duration,
-        dtype=None,
-    )
+    else:
+        samples, sr = librosa.load(
+            path,
+            sr=sample_rate,
+            res_type=resample_type,
+            mono=to_mono,
+            offset=offset,
+            duration=duration,
+            dtype=None,
+        )
+    
     # temporary workaround for soundfile issue #349
     # which causes empty sample array if loading float32 from mp3:
     # pass dtype=None, then change it afterwards
@@ -1828,12 +1828,15 @@ def _audio_from_file_handler(
         # if the offset > 0, we need to update the timestamp
         if "recording_start_time" in metadata and offset > 0:
             # timedelta doesn't like np types, fix issue #928
-            offset = cast_np_to_native(offset)
-            metadata["recording_start_time"] += datetime.timedelta(seconds=offset)
+            old_offset = cast_np_to_native(old_offset)
+            metadata["recording_start_time"] += datetime.timedelta(seconds=old_offset) 
+            #records the true/gps time offset + file_start_time in the metadata
+            #the audio loading is based on the new, nominal/computed offset
+            #but it corresponds to this "true" time
 
         #########################################################
-        if barlt == True:
-            sr = computed_sample_rate
+        # if barlt == True:
+        #     sr = computed_sample_rate
         #########################################################
 
     return cls(samples, sr, resample_type=resample_type, metadata=metadata)
