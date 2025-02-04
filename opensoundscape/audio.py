@@ -1736,10 +1736,23 @@ def _audio_from_file_handler(
 
     if barlt == True:
         old_offset = offset
-        offset = old_offset * metadata['samplerate']/metadata['true_sample_rate'] ##TRYING FLIPPED HERE##
+        offset = old_offset * metadata['true_sample_rate']/metadata['samplerate'] #flipped is wrong I think#
+
+        # because:
+        # old_offset * metadata['samplerate']/ (file_duration * metadata['samplerate'] / gps_duration )
+        # old_offset * gps_duration / file_duration
+        # this gives true/gps time? but that's the opposite of the goal below... 
+        # ah right because we want to put the offset in as the real GPS time then convert to the specific file's time 
+
         print(f'updated time offset based on true sr from {old_offset} to {offset}')
+    # Sam says to get:
     #true_sample_rate = n_samples / real_time
-    #offset = offset * true_sample_rate / sample_rate
+    #true_offset = offset * true_sample_rate / sample_rate
+
+    # which means:
+    #true_offset = offset * n_samples / real_time / sample_rate
+    #true_offset = offset * file_duration * sample_rate / real_time / sample_rate
+    #true_offset = offset * file_duration / real_time
 
     #########################################################
 
