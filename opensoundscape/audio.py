@@ -1751,7 +1751,8 @@ def _audio_from_file_handler(
     warnings.filterwarnings("ignore")
 
     # implementing duration differences causes problems with xcorr and shouldn't matter too much...I think...
-    samples_to_load = duration * metadata['true_sample_rate'] #seconds * real_samples/second = real_samples
+    real_sample_rate = metadata['true_sample_rate']
+    samples_to_load = duration * real_sample_rate #seconds * real_samples/second = real_samples
     duration_to_load_wit_librosa = samples_to_load / sample_rate    #real_samples / (desired_samples/seconds) = desired_seconds, I think!
     #target_new_times = duration * metadata['samplerate']
     offset_to_load_wit_librosa = offset #should be nominal bc we're not changing the sample_rate in metadata
@@ -1770,11 +1771,11 @@ def _audio_from_file_handler(
         print(f'loaded at offset {offset}')
         samples = librosa.resample(
                 samples,
-                orig_sr=metadata['true_sample_rate'],
+                orig_sr=real_sample_rate,
                 target_sr=sample_rate,
                 res_type=resample_type,
             )
-        print(f'resampled audio from {metadata['true_sample_rate']} to {sample_rate}')
+        print(f'resampled audio from {real_sample_rate} to {sample_rate}')
         #samples = scipy.signal.resample(samples,target_new_times) #not np
         #new_samples = np.resample(samples,target_new_times) # Sam's note
 
