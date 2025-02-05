@@ -1751,12 +1751,12 @@ def _audio_from_file_handler(
     warnings.filterwarnings("ignore")
 
     # implementing duration differences causes problems with xcorr and shouldn't matter too much...I think...
-    samples_to_load = duration # * computed_sample_rate
-    duration_to_load_wit_librosa = samples_to_load #/ metadata['samplerate']    # did we decide this didn't matter?
+    samples_to_load = duration * computed_sample_rate #seconds * real_samples/second = real_samples
+    duration_to_load_wit_librosa = samples_to_load / sample_rate    #real_samples / (desired_samples/seconds) = desired_seconds, I think!
     #target_new_times = duration * metadata['samplerate']
     offset_to_load_wit_librosa = offset #should be nominal bc we're not changing the sample_rate in metadata
 
-    # now it's not different, but keeping it separate so duration alteration could be implemented
+    # test duration/sample rate change so that the lag gets offset too...should make such a tiny difference...
     if barlt==True:
         samples, sr = librosa.load(
             path,
@@ -1768,8 +1768,15 @@ def _audio_from_file_handler(
             dtype=None,
         )
         print(f'loaded at offset {offset}')
+        samples = librosa.resample(
+                samples,
+                orig_sr=computed_sample_rate,
+                target_sr=sample_rate,
+                res_type=resample_type,
+            )
+        print(f'resampled audio from {computed_sample_rate} to {sample_rate}')
         #samples = scipy.signal.resample(samples,target_new_times) #not np
-        #new_samples = np.resample(samples,target_new_times) # did we decide this didn't matter?
+        #new_samples = np.resample(samples,target_new_times) # Sam's note
 
     else:
         samples, sr = librosa.load(
