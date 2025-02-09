@@ -1693,6 +1693,7 @@ def _audio_from_file_handler(
         computed_sample_rate = file_duration * metadata['samplerate'] / gps_duration 
         #n_samples/(end_seconds-beginning_seconds)
         # or librosa.get_samplerate(path=path)?
+        #print(computed_sample_rate)
 
         #update metadata
         metadata['recording_start_time'] = start_datetime
@@ -1751,9 +1752,9 @@ def _audio_from_file_handler(
     warnings.filterwarnings("ignore")
 
     # implementing duration differences causes problems with xcorr and shouldn't matter too much...I think...
-    real_sample_rate = metadata['true_sample_rate']
-    samples_to_load = duration * real_sample_rate #seconds * real_samples/second = real_samples
-    duration_to_load_wit_librosa = samples_to_load / sample_rate    #real_samples / (desired_samples/seconds) = desired_seconds, I think!
+    #real_sample_rate = metadata['true_sample_rate']
+    samples_to_load = duration #* real_sample_rate #seconds * real_samples/second = real_samples
+    duration_to_load_wit_librosa = samples_to_load #/ sample_rate    #real_samples / (desired_samples/seconds) = desired_seconds, I think!
     #target_new_times = duration * metadata['samplerate']
     offset_to_load_wit_librosa = offset #should be nominal bc we're not changing the sample_rate in metadata
 
@@ -1768,14 +1769,14 @@ def _audio_from_file_handler(
             duration=duration_to_load_wit_librosa,
             dtype=None,
         )
-        print(f'loaded at offset {offset}')
-        samples = librosa.resample(
-                samples,
-                orig_sr=real_sample_rate,
-                target_sr=sample_rate,
-                res_type=resample_type,
-            )
-        print(f'resampled audio from {real_sample_rate} to {sample_rate}')
+        # print(f'loaded at offset {offset}')
+        # samples = librosa.resample(
+        #         samples,
+        #         orig_sr=real_sample_rate,
+        #         target_sr=sample_rate,
+        #         res_type=resample_type,
+        #     )
+        # print(f'resampled audio from {real_sample_rate} to {sample_rate}')
         #samples = scipy.signal.resample(samples,target_new_times) #not np
         #new_samples = np.resample(samples,target_new_times) # Sam's note
 
@@ -1840,7 +1841,7 @@ def _audio_from_file_handler(
             #records the true/gps time offset + file_start_time in the metadata
             #the audio loading is based on the new, nominal/computed offset
             #but it corresponds to this "true" time
-            print(f'updated metadata start time using input (true/gps) offset, {old_offset}s')
+            #print(f'updated metadata start time using input (true/gps) offset, {old_offset}s')
 
 
         #########################################################
