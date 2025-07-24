@@ -611,8 +611,16 @@ def tdoa(
             f"max_delay cannot be longer than 1/2 the signal. max_delay is {max_delay} seconds, signal is {audio_len} seconds long."
         )
     # trim the primary signal to just the central part
-    start = int(max_delay * sample_rate)
+    start = int(max_delay * sample_rate) # AM: recreates the 0 start bc the input in spatial_event is: self.receiver_start_time_offsets[index] - self.max_delay
     end = int(len(reference_signal) - max_delay * sample_rate)
+    ##### SINCE THE SIGNALS NEED TO BE THE SAME LENGTH, ##########
+    ##### THIS ISN'T CLIPPING IT TO THE CENTRAL PART...RIGHT? ####
+    ##### og_start = offset - max_delay
+    ##### og_len = duration + 2 * max_delay
+    ##### og_end = offset - max_delay + duration + 2 * max_delay = offset + duration + max_delay
+    ##### new_start = max_delay
+    ##### new_end = ref_len - max_delay = duration + 2 * max_delay - max_delay = duration + max_delay
+    ##### new_len = duration + max_delay - max_delay = duration...
     signal = signal[start:end]
 
     # compute the generalized cross correlation between the signals

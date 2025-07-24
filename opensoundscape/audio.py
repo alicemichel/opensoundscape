@@ -1679,10 +1679,17 @@ def _audio_from_file_handler(
         start = metadata["title"][10:23]
         hour = float(start[0:2]); min = float(start[2:4]); sec = float(start[4:])
         gps_start = hour*60*60 + min*60 + sec
+        #and end time
         end = metadata["title"][39:52]
         hour_end = float(end[0:2]); min_end = float(end[2:4]); sec_end = float(end[4:])
         gps_end = hour_end*60*60 + min_end*60 + sec_end
-        
+
+        #check date on both
+        if metadata["title"][1:9] != metadata["title"][30:38]:
+            #if end date is one day after start date (so, doesn't match)
+            #then, add 24h to end time
+            gps_end = gps_end + 60*60*24
+
         #measure true/gps time duration
         gps_duration = gps_end - gps_start
 
