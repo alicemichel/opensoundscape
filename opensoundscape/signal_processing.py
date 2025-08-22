@@ -10,6 +10,11 @@ import torch
 
 from opensoundscape.utils import inrange
 
+# additional for 2d
+from opensoundscape import Spectrogram
+import scipy.signal as signal
+from scipy.signal import fftconvolve
+
 
 def frequency2scale(frequency, wavelet, sample_rate):
     """determine appropriate wavelet scale for desired center frequency
@@ -557,6 +562,25 @@ def gcc(x, y, cc_filter="phat", epsilon=0.001):
     return cc.numpy()
 
 
+def cc2d(primary_spec, ref_spec):
+
+    # Extract spectrograms
+    S1 = ref_spec.spectrogram
+    S2 = primary_spec.spectrogram
+
+    # Normalize
+    S1_norm = (S1 - np.mean(S1)) / (np.std(S1) + 1e-10)
+    S2_norm = (S2 - np.mean(S2)) / (np.std(S2) + 1e-10)
+
+    # 2D cross-correlation
+    corr_fast = fftconvolve(S1_norm, S2_norm[::-1, ::-1], mode='full') # We flip both axes in S2n[::-1, ::-1] because convolution flips both axes, which when combined with the input corresponds to cross-correlation.
+    # corr_fast = fftconvolve(S1n, S2n[:, ::-1], mode='full') # this option only flips time if frequency content is aligned (no shift along frequency bins) 
+    #corr = signal.correlate2d(S1_norm, S2_norm, mode="full") # original, slow method
+
+    return corr_fast
+
+
+
 def tdoa(
     signal,
     reference_signal,
@@ -639,6 +663,75 @@ def tdoa(
 
     if return_max:
         return tdoa, np.max(cc)
+
+    else:
+        return tdoa
+
+
+
+def tdoa_cc2d(
+    primary_audio,
+    reference_audio,
+    window_samples = 2048,
+    overlap_samples = 1840, #90% overlap
+    window_type='hann',
+    bandpass_min=30,
+    bandpass_max=1000,
+    bandpass_order=10,
+    sr,
+    return_max=False,
+):
+    """Estimate time difference of arrival between two spectra
+
+    estimates time delay by finding the maximum 2d ccorr
+
+    Args:
+        ....... #### ADD HERE ########
+
+        sample_rate: sample rate (Hz) of signals; both signals must have same sample rate
+        return_max: if True, returns the maximum value of the generalized cross correlation
+
+            For example, if max_delay=0.5, the tdoa returned will be the delay between -0.5 and +0.5 seconds, that maximizes the cross-correlation.
+            This is useful if you know the maximum possible delay between the two signals, and want to ignore any tdoas outside of that range.
+            e.g. if receivers are 100m apart, and the speed of sound is 340m/s, then the maximum possible delay is 0.294 seconds.
+    Returns:
+        estimated delay from reference signal to signal, in seconds
+        (note that default samping rate is 1.0 samples/second)
+
+        if return_max is True, returns a second value, the maximum value of the
+        result of generalized cross correlation
+
+    See also: cc2d() if you want the raw output of 2d cross correlation
+    """
+
+    # prepare the spectrograms
+    primary_flt = primary_audio.bandpass(bandpass_min,bandpass_max, order=bandpass_order) #this filter might not do anything this way, check
+    primary_spec = Spectrogram.from_audio(primary_flt, window_type=window_type, window_samples=window_samples, overlap_samples=overlap_samples)
+    primary_spec = primary_spec.bandpass(bandpass_min,bandpass_max)
+
+    ref_flt = reference_audio.bandpass(bandpass_min,bandpass_max, order=bandpass_order) #this filter might not do anything this way, check
+    ref_spec = Spectrogram.from_audio(ref_flt, window_type=window_type, window_samples=window_samples, overlap_samples=overlap_samples)
+    ref_spec = ref_spec.bandpass(bandpass_min,bandpass_max)
+
+    # get (true?) sample rate
+    sr = ref_flt.sample_rate # gotten in spatial event already
+
+    # compute the 2-dimensional cross correlation between the spectra
+    corr_fast = cc2d(primary_spec=primary_spec, ref_spec=ref_spec, sr=sr, window_samples=window_samples, overlap_samples=overlap_samples)
+
+    # Locate peak
+    x_peak = np.unravel_index(np.argmax(corr_fast), corr_fast.shape)[1]
+    x_off = x_peak - corr_fast.shape[1] // 2
+
+    # Compute time delay (TDOA)
+    hop_time = (window_samples - overlap_samples) / sr
+    tdoa = x_off * hop_time
+
+    # Find max correlation value and its index
+    cc_max = np.max(corr_fast)
+
+    if return_max:
+        return tdoa, cc_max
 
     else:
         return tdoa

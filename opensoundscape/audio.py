@@ -38,7 +38,7 @@ import noisereduce
 
 import opensoundscape
 from opensoundscape.utils import generate_clip_times_df
-from opensoundscape.signal_processing import tdoa
+from opensoundscape.signal_processing import tdoa, tdoa_cc2d
 from opensoundscape.utils import cast_np_to_native
 
 DEFAULT_RESAMPLE_TYPE = "soxr_hq"  # changed from kaiser_fast in v0.9.0
@@ -1311,15 +1311,31 @@ def estimate_delay(
         if not skip_ref_bandpass:
             reference_audio = reference_audio.bandpass(l, h, bandpass_order)
 
-    # estimate time delay from reference_audio to audio using generalized cross correlation
-    return tdoa(
-        primary_audio.samples,
-        reference_audio.samples,
-        max_delay=max_delay,
-        cc_filter=cc_filter,
-        sample_rate=sr,
-        return_max=return_cc_max,
-    )
+    if cc_filter == "cc2d":
+        # estimate time delay from reference_audio to audio using 2d cross correlation
+        return tdoa_cc2d(
+            primary_audio,
+            reference_audio,
+            window_samples = 2048,
+            overlap_samples = 1840, #90% overlap
+            window_type='hann',
+            bandpass_min=bandpass_range[0],
+            bandpass_max=bandpass_range[1],
+            bandpass_order=bandpass_order,
+            sample_rate=sr,
+            return_max=return_cc_max,
+        )
+
+    else:
+        # estimate time delay from reference_audio to audio using generalized cross correlation
+        return tdoa(
+            primary_audio.samples,
+            reference_audio.samples,
+            max_delay=max_delay,
+            cc_filter=cc_filter,
+            sample_rate=sr,
+            return_max=return_cc_max,
+        )
 
 
 def parse_opso_metadata(comment_string):
