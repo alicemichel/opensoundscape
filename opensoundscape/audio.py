@@ -1267,6 +1267,9 @@ def estimate_delay(
     bandpass_range=None,
     bandpass_order=9,
     cc_filter="phat",
+    window_samples = 2048,
+    overlap_samples = 1840, #90% overlap
+    window_type='hann',
     return_cc_max=False,
     skip_ref_bandpass=False,
 ):
@@ -1316,13 +1319,12 @@ def estimate_delay(
         return tdoa_cc2d(
             primary_audio,
             reference_audio,
-            window_samples = 2048,
-            overlap_samples = 1840, #90% overlap
-            window_type='hann',
+            window_samples = window_samples,
+            overlap_samples = overlap_samples,
+            window_type=window_type,
             bandpass_min=bandpass_range[0],
             bandpass_max=bandpass_range[1],
             bandpass_order=bandpass_order,
-            sample_rate=sr,
             return_max=return_cc_max,
         )
 

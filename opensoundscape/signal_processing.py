@@ -11,7 +11,6 @@ import torch
 from opensoundscape.utils import inrange
 
 # additional for 2d
-from opensoundscape import Spectrogram
 import scipy.signal as signal
 from scipy.signal import fftconvolve
 
@@ -565,8 +564,8 @@ def gcc(x, y, cc_filter="phat", epsilon=0.001):
 def cc2d(primary_spec, ref_spec):
 
     # Extract spectrograms
-    S1 = ref_spec.spectrogram
-    S2 = primary_spec.spectrogram
+    S1 = primary_spec.spectrogram
+    S2 = ref_spec.spectrogram
 
     # Normalize
     S1_norm = (S1 - np.mean(S1)) / (np.std(S1) + 1e-10)
@@ -678,31 +677,12 @@ def tdoa_cc2d(
     bandpass_min=30,
     bandpass_max=1000,
     bandpass_order=10,
-    sr,
     return_max=False,
 ):
     """Estimate time difference of arrival between two spectra
-
-    estimates time delay by finding the maximum 2d ccorr
-
-    Args:
-        ....... #### ADD HERE ########
-
-        sample_rate: sample rate (Hz) of signals; both signals must have same sample rate
-        return_max: if True, returns the maximum value of the generalized cross correlation
-
-            For example, if max_delay=0.5, the tdoa returned will be the delay between -0.5 and +0.5 seconds, that maximizes the cross-correlation.
-            This is useful if you know the maximum possible delay between the two signals, and want to ignore any tdoas outside of that range.
-            e.g. if receivers are 100m apart, and the speed of sound is 340m/s, then the maximum possible delay is 0.294 seconds.
-    Returns:
-        estimated delay from reference signal to signal, in seconds
-        (note that default samping rate is 1.0 samples/second)
-
-        if return_max is True, returns a second value, the maximum value of the
-        result of generalized cross correlation
-
-    See also: cc2d() if you want the raw output of 2d cross correlation
     """
+
+    from opensoundscape.spectrogram import Spectrogram
 
     # prepare the spectrograms
     primary_flt = primary_audio.bandpass(bandpass_min,bandpass_max, order=bandpass_order) #this filter might not do anything this way, check
@@ -717,7 +697,7 @@ def tdoa_cc2d(
     sr = ref_flt.sample_rate # gotten in spatial event already
 
     # compute the 2-dimensional cross correlation between the spectra
-    corr_fast = cc2d(primary_spec=primary_spec, ref_spec=ref_spec, sr=sr, window_samples=window_samples, overlap_samples=overlap_samples)
+    corr_fast = cc2d(primary_spec=primary_spec, ref_spec=ref_spec)
 
     # Locate peak
     x_peak = np.unravel_index(np.argmax(corr_fast), corr_fast.shape)[1]
