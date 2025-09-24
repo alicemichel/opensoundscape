@@ -11,6 +11,7 @@ from opensoundscape.localization import localization_algorithms
 from opensoundscape.localization.position_estimate import PositionEstimate
 
 
+
 class SpatialEvent:
     """
     Class that estimates the location of a single sound event
@@ -103,11 +104,13 @@ class SpatialEvent:
         self.class_name = class_name
         self.receiver_start_time_offsets = receiver_start_time_offsets
 
+        # Test disabling max_delay
         # Verify that max_delay is not longer than the duration of the audio and raise a value error if it is
-        if self.max_delay >= self.duration:
-            raise ValueError(
-                f"max_delay ({self.max_delay}) is longer than duration ({self.duration}) of audio clips."
-            )
+        # if self.max_delay >= self.duration:
+        #     raise ValueError(
+        #         f"max_delay ({self.max_delay}) is longer than duration ({self.duration}) of audio clips."
+        #     )
+        # NEED TO DO THIS!!!!
 
         # computed attributes
         self.tdoas = None  # time delay at each receiver
@@ -260,7 +263,7 @@ class SpatialEvent:
         for index, file in enumerate(self.receiver_files):
             if index == 0:  # can skip reference audio cc with itself
                 tdoas.append(0)  # first file's delay to itself is zero
-                cc_maxs.append(1)  # set first file's cc_max to 1
+                cc_maxs.append(1)  # set first file's cc_max to 1 (doesn't make sense for cc2d bc I didn't normalize the scores - need to do!)
                 continue
 
             # use specified time offsets to extract the correct audio segment
