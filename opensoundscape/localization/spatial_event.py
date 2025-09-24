@@ -104,13 +104,12 @@ class SpatialEvent:
         self.class_name = class_name
         self.receiver_start_time_offsets = receiver_start_time_offsets
 
-        # Test disabling max_delay
+        # Alice added - Test disabling max_delay - not needed for cc2d, may need to reactivate for 1D cc
         # Verify that max_delay is not longer than the duration of the audio and raise a value error if it is
         # if self.max_delay >= self.duration:
         #     raise ValueError(
         #         f"max_delay ({self.max_delay}) is longer than duration ({self.duration}) of audio clips."
         #     )
-        # NEED TO DO THIS!!!!
 
         # computed attributes
         self.tdoas = None  # time delay at each receiver
@@ -230,7 +229,7 @@ class SpatialEvent:
         # load audio from desired time period
         reference_audio = Audio.from_file(
             self.receiver_files[0],
-            offset=self.receiver_start_time_offsets[0] - self.max_delay, #### HERE? ####
+            offset=self.receiver_start_time_offsets[0] - self.max_delay,
             duration=extracted_clip_duration,
             barlt=True,
         )
@@ -269,7 +268,7 @@ class SpatialEvent:
             # use specified time offsets to extract the correct audio segment
             audio2 = Audio.from_file(
                 file,
-                offset=self.receiver_start_time_offsets[index] - self.max_delay, #### HERE? ####
+                offset=self.receiver_start_time_offsets[index] - self.max_delay,
                 duration=extracted_clip_duration,
                 barlt=True,
             )

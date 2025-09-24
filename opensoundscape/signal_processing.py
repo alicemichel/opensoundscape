@@ -10,7 +10,7 @@ import torch
 
 from opensoundscape.utils import inrange
 
-# additional for 2d
+# Alice added: additional for 2d
 import scipy.signal as signal
 from scipy.signal import fftconvolve
 
@@ -561,7 +561,7 @@ def gcc(x, y, cc_filter="phat", epsilon=0.001):
     return cc.numpy()
 
 
-def cc2d(primary_spec, ref_spec):
+def cc2d(primary_spec, ref_spec): #Alice addition
 
     # Extract spectrograms
     S1 = primary_spec.spectrogram
@@ -574,7 +574,7 @@ def cc2d(primary_spec, ref_spec):
     # 2D cross-correlation
     corr_fast = fftconvolve(S1_norm, S2_norm[::-1, ::-1], mode='full') # We flip both axes in S2n[::-1, ::-1] because convolution flips both axes, which when combined with the input corresponds to cross-correlation.
     # corr_fast = fftconvolve(S1n, S2n[:, ::-1], mode='full') # this option only flips time if frequency content is aligned (no shift along frequency bins) 
-    #corr = signal.correlate2d(S1_norm, S2_norm, mode="full") # original, slow method
+    # corr = signal.correlate2d(S1_norm, S2_norm, mode="full") # slow method
 
     return corr_fast
 
@@ -636,6 +636,7 @@ def tdoa(
     # trim the primary signal to just the central part
     start = int(max_delay * sample_rate) # AM: recreates the 0 start bc the input in spatial_event is: self.receiver_start_time_offsets[index] - self.max_delay
     end = int(len(reference_signal) - max_delay * sample_rate)
+    ##### Alice comments - need to check:
     ##### SINCE THE SIGNALS NEED TO BE THE SAME LENGTH, ##########
     ##### THIS ISN'T CLIPPING IT TO THE CENTRAL PART...RIGHT? ####
     ##### og_start = offset - max_delay
@@ -667,6 +668,8 @@ def tdoa(
         return tdoa
 
 
+
+# Alice added: additional function for 2D/spectrographic cross-correlation
 
 def tdoa_cc2d(
     primary_audio,

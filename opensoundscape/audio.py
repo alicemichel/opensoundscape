@@ -38,7 +38,7 @@ import noisereduce
 
 import opensoundscape
 from opensoundscape.utils import generate_clip_times_df
-from opensoundscape.signal_processing import tdoa, tdoa_cc2d
+from opensoundscape.signal_processing import tdoa, tdoa_cc2d #Alice added 2D/spectro ccorr
 from opensoundscape.utils import cast_np_to_native
 
 DEFAULT_RESAMPLE_TYPE = "soxr_hq"  # changed from kaiser_fast in v0.9.0
@@ -202,7 +202,7 @@ class Audio:
         start_timestamp=None,
         out_of_bounds_mode="warn",
         ################
-        barlt=False,
+        barlt=False, #Alice added. warning that this does not work on models built with normal opso build
         ################
     ):
         """Load audio from files
@@ -1314,7 +1314,7 @@ def estimate_delay(
         if not skip_ref_bandpass:
             reference_audio = reference_audio.bandpass(l, h, bandpass_order)
 
-    if cc_filter == "cc2d":
+    if cc_filter == "cc2d": #Alice addition
         # estimate time delay from reference_audio to audio using 2d cross correlation
         return tdoa_cc2d(
             primary_audio,
@@ -1607,7 +1607,7 @@ def _audio_from_file_handler(
     start_timestamp=None,
     out_of_bounds_mode="warn",
     ################
-    barlt=False,
+    barlt=False, #Alice added
     ################
 ):
     """Load audio from files
@@ -1685,7 +1685,7 @@ def _audio_from_file_handler(
 
     #######################################################
     
-    #barlt = metadata['artist'] == 'Frontier Labs'
+    # Alice added: get metadata and true time from Frontier Labs BAR-LT files
 
     if barlt == True:
         
