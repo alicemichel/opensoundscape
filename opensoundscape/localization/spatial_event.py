@@ -25,6 +25,8 @@ class SpatialEvent:
         receiver_files,
         receiver_locations,
         max_delay,
+        window_samples=2048,
+        overlap_samples=1840,
         min_n_receivers=3,
         receiver_start_time_offsets=None,
         start_timestamp=None,
@@ -287,8 +289,8 @@ class SpatialEvent:
                     cc_filter=self.cc_filter,
                     return_cc_max=True,
                     skip_ref_bandpass=True,
-                    window_samples = 2048,
-                    overlap_samples = 1840, #90% overlap
+                    window_samples = window_samples,
+                    overlap_samples = overlap_samples
                 )
                 tdoas.append(tdoa)
                 cc_maxs.append(cc_max)
