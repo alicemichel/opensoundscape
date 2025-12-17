@@ -1264,11 +1264,11 @@ def estimate_delay(
     primary_audio,
     reference_audio,
     max_delay,
+    window_samples,
+    overlap_samples, #90% overlap
     bandpass_range=None,
     bandpass_order=9,
     cc_filter="phat",
-    window_samples = 2048,
-    overlap_samples = 1840, #90% overlap
     window_type='hann',
     return_cc_max=False,
     skip_ref_bandpass=False,

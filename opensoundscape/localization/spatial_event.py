@@ -287,6 +287,8 @@ class SpatialEvent:
                     cc_filter=self.cc_filter,
                     return_cc_max=True,
                     skip_ref_bandpass=True,
+                    window_samples = 2048,
+                    overlap_samples = 1840, #90% overlap
                 )
                 tdoas.append(tdoa)
                 cc_maxs.append(cc_max)
