@@ -1319,8 +1319,8 @@ def estimate_delay(
         return tdoa_cc2d(
             primary_audio,
             reference_audio,
-            window_samples = window_samples,
-            overlap_samples = overlap_samples,
+            window_samples=window_samples,
+            overlap_samples=overlap_samples,
             window_type=window_type,
             bandpass_min=bandpass_range[0],
             bandpass_max=bandpass_range[1],

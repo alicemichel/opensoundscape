@@ -97,6 +97,8 @@ class SpatialEvent:
         self.max_delay = max_delay
         self.bandpass_range = bandpass_range
         self.speed_of_sound = speed_of_sound
+        self.window_samples = window_samples
+        self.overlap_samples = overlap_samples
 
         # static attributes
         self.receiver_files = receiver_files
@@ -289,8 +291,8 @@ class SpatialEvent:
                     cc_filter=self.cc_filter,
                     return_cc_max=True,
                     skip_ref_bandpass=True,
-                    window_samples = window_samples,
-                    overlap_samples = overlap_samples
+                    window_samples=self.window_samples,
+                    overlap_samples=self.overlap_samples,
                 )
                 tdoas.append(tdoa)
                 cc_maxs.append(cc_max)
