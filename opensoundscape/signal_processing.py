@@ -681,6 +681,7 @@ def tdoa_cc2d(
     bandpass_max=1000,
     bandpass_order=10,
     return_max=False,
+    return_trace=False,
 ):
     """Estimate time difference of arrival between two spectra
     """
@@ -712,6 +713,9 @@ def tdoa_cc2d(
 
     # Find max correlation value and its index
     cc_max = np.max(corr_fast)
+
+    if return_trace:
+        return tdoa, cc_max, corr_fast
 
     if return_max:
         return tdoa, cc_max

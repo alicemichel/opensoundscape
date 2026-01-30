@@ -1271,6 +1271,7 @@ def estimate_delay(
     cc_filter="phat",
     window_type='hann',
     return_cc_max=False,
+    return_trace=False,
     skip_ref_bandpass=False,
 ):
     """
@@ -1326,6 +1327,7 @@ def estimate_delay(
             bandpass_max=bandpass_range[1],
             bandpass_order=bandpass_order,
             return_max=return_cc_max,
+            return_trace=return_trace
         )
 
     else:

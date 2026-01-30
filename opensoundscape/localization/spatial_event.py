@@ -290,6 +290,7 @@ class SpatialEvent:
                     bandpass_range=self.bandpass_range,
                     cc_filter=self.cc_filter,
                     return_cc_max=True,
+                    return_trace=True,
                     skip_ref_bandpass=True,
                     window_samples=self.window_samples,
                     overlap_samples=self.overlap_samples,
