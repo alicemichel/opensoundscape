@@ -705,7 +705,21 @@ def tdoa_cc2d(
 
     # Locate peak
     x_peak = np.unravel_index(np.argmax(corr_fast), corr_fast.shape)[1]
-    x_off = x_peak - corr_fast.shape[1] // 2
+
+    ####  TESTING   ####
+    # Collapsed-frequency correlation
+    corr_time = corr_fast.sum(axis=0)
+    x_peak = np.argmax(corr_time)
+    ####  TESTING   ####
+
+    x_off = x_peak - corr_fast.shape[1] // 2 #the peak may be shifted incorrectly here!
+
+    # x_peak = np.argmax(corr_fast, axis=None) % corr_fast.shape[1]
+    # time_zero = S2.shape[1] - 1
+    # x_off = x_peak - time_zero
+    # tdoa = x_off * hop_time
+    # I don't think we want this bc I checked with itself.
+
 
     # Compute time delay (TDOA)
     hop_time = (window_samples - overlap_samples) / sr
@@ -713,6 +727,10 @@ def tdoa_cc2d(
 
     # Find max correlation value and its index
     cc_max = np.max(corr_fast)
+
+    ####  TESTING   ####
+    cc_max = corr_time[x_peak]
+    ####  TESTING   ####
 
     if return_trace:
         return tdoa, cc_max, corr_fast

@@ -118,6 +118,7 @@ class SpatialEvent:
         # computed attributes
         self.tdoas = None  # time delay at each receiver
         self.cc_maxs = None  # max of cross correlation for each time delay
+        self.corr_fasts = None  # cross correlation trace for each receiver
 
     def estimate_location(
         self,
@@ -246,7 +247,7 @@ class SpatialEvent:
             self.error_msg = "did not get audio clip of desired length"
             self.tdoas = None
             self.cc_maxs = None
-            return None, None
+            return None, None, None
 
         # bandpass once now to avoid repeating operation for each receiver
         if self.bandpass_range is not None:
@@ -258,16 +259,19 @@ class SpatialEvent:
         # skip the first because we don't need to cross correlate a file with itself
         tdoas = []
         cc_maxs = []
+        corr_fasts = []
 
         # catch the receivers that have an issue and should be discarded
         # e.g. their file starts or end during the time-window, so estimate_delays is not possible
         bad_receivers_index = []
 
         for index, file in enumerate(self.receiver_files):
-            if index == 0:  # can skip reference audio cc with itself
-                tdoas.append(0)  # first file's delay to itself is zero
-                cc_maxs.append(1)  # set first file's cc_max to 1 (doesn't make sense for cc2d bc I didn't normalize the scores - need to do!)
-                continue
+            # for testing only - don't skip first file
+            # if index == 0:  # can skip reference audio cc with itself
+            #     tdoas.append(0)  # first file's delay to itself is zero
+            #     cc_maxs.append(1)  # set first file's cc_max to 1 (doesn't make sense for cc2d bc I didn't normalize the scores - need to do!)
+            #     corr_fasts.append(0)
+            #     continue
 
             # use specified time offsets to extract the correct audio segment
             audio2 = Audio.from_file(
@@ -283,7 +287,7 @@ class SpatialEvent:
             ):  # allow for 1 sample difference
                 bad_receivers_index.append(index)
             else:
-                tdoa, cc_max = audio.estimate_delay(
+                tdoa, cc_max, corr_fast = audio.estimate_delay(
                     primary_audio=audio2,
                     reference_audio=reference_audio,
                     max_delay=self.max_delay,
@@ -297,9 +301,12 @@ class SpatialEvent:
                 )
                 tdoas.append(tdoa)
                 cc_maxs.append(cc_max)
+                corr_fasts.append(corr_fast)
+
 
         self.tdoas = np.array(tdoas)
         self.cc_maxs = np.array(cc_maxs)
+        self.corr_fasts = corr_fasts
 
         # delete the bad receivers from this SpatialEvent
         if len(bad_receivers_index) > 0:
@@ -321,7 +328,7 @@ class SpatialEvent:
                 ]
             )
 
-        return self.tdoas, self.cc_maxs
+        return self.tdoas, self.cc_maxs, self.corr_fasts
 
     def _localize_after_cross_correlation(self, localization_algorithm):
         """
@@ -373,6 +380,7 @@ class SpatialEvent:
             receiver_locations=locations,
             tdoas=tdoas,
             cc_maxs=self.cc_maxs[self.cc_maxs > self.cc_threshold],
+            corr_fasts=[self.corr_fasts[i] for i in range(len(self.corr_fasts)) if self.cc_maxs[i] > self.cc_threshold],
             start_timestamp=self.start_timestamp,
             receiver_start_time_offsets=self.receiver_start_time_offsets,
             duration=self.duration,
@@ -386,6 +394,7 @@ class SpatialEvent:
             "receiver_locations",
             "tdoas",
             "cc_maxs",
+            "corr_fasts",
             "location_estimate",
             "distance_residuals",
             "receivers_used_for_localization",

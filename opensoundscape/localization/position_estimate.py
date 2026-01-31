@@ -34,6 +34,7 @@ class PositionEstimate:
         receiver_locations=None,
         tdoas=None,
         cc_maxs=None,
+        corr_fasts=None,
         start_timestamp=None,
         receiver_start_time_offsets=None,
         duration=None,
@@ -45,6 +46,7 @@ class PositionEstimate:
         self.receiver_locations = receiver_locations
         self.tdoas = tdoas
         self.cc_maxs = cc_maxs
+        self.corr_fasts = corr_fasts
         self.start_timestamp = start_timestamp
         self.receiver_start_time_offsets = receiver_start_time_offsets
         self.duration = duration
@@ -66,6 +68,7 @@ class PositionEstimate:
             "receiver_locations",
             "tdoas",
             "cc_maxs",
+            "corr_fasts",
             "location_estimate",
             "distance_residuals",
         )
