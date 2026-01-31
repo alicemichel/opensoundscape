@@ -305,7 +305,7 @@ class SpatialEvent:
 
 
         self.tdoas = np.array(tdoas)
-        self.cc_maxs = np.array(cc_maxs)
+        self.cc_maxs = np.array(cc_maxs/max(cc_maxs))  # normalize cc_maxs to max value, should only change it for cc2d, since cc1d is already normalized
         self.corr_fasts = corr_fasts
 
         # delete the bad receivers from this SpatialEvent
