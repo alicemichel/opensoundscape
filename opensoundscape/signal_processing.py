@@ -587,6 +587,7 @@ def tdoa(
     cc_filter="phat",
     sample_rate=1,
     return_max=False,
+    return_trace=False,
 ):
     """Estimate time difference of arrival between two signals
 
@@ -661,8 +662,11 @@ def tdoa(
     tdoa = (lag / sample_rate) - max_delay  #### HERE? ####
     max_cc = np.max(cc)
 
+    if return_trace:
+        return tdoa, max_cc, cc
+
     if return_max:
-        return tdoa, np.max(cc)
+        return tdoa, max_cc
 
     else:
         return tdoa
