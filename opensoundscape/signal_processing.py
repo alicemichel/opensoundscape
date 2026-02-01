@@ -686,6 +686,7 @@ def tdoa_cc2d(
     bandpass_order=10,
     return_max=False,
     return_trace=False,
+    cc2d_collapse=False, #options: None (shift freq+time), 'time_only' (collapsed frequency)
 ):
     """Estimate time difference of arrival between two spectra
     """
@@ -707,23 +708,33 @@ def tdoa_cc2d(
     # compute the 2-dimensional cross correlation between the spectra
     corr_fast = cc2d(primary_spec=primary_spec, ref_spec=ref_spec)
 
+    ### below, a failed attempt to constrain to the valid region - may go back and reattempt ###
+    # filter to only the 'valid' part of the cross correlation, where the signals overlap fully
+    # 2D case: only trim time axis (axis=1)
+    # print(len(primary_audio.samples))
+    # corr_fast = corr_fast[:, len(primary_audio.samples)-1 : -len(primary_audio.samples)+1]
+    ### this attempt didn't work ###
+
     # Locate peak
     x_peak = np.unravel_index(np.argmax(corr_fast), corr_fast.shape)[1]
 
     ####  TESTING   ####
-    # Collapsed-frequency correlation
-    corr_time = corr_fast.sum(axis=0)
-    x_peak = np.argmax(corr_time)
+    if cc2d_collapse == True:
+        # Collapsed-frequency correlation
+        corr_time = corr_fast.sum(axis=0) # this gives poorer results compared to full 2D, but it may be useful for assessing peak uncertainty
+        x_peak = np.argmax(corr_time)
     ####  TESTING   ####
 
     x_off = x_peak - corr_fast.shape[1] // 2 #the peak may be shifted incorrectly here!
 
+    # ####  TESTING   ####
+    # # Possibly need to adjust for time zero position -- don't think so.
     # x_peak = np.argmax(corr_fast, axis=None) % corr_fast.shape[1]
     # time_zero = S2.shape[1] - 1
     # x_off = x_peak - time_zero
     # tdoa = x_off * hop_time
     # I don't think we want this bc I checked with itself.
-
+    # ####  TESTING   ####
 
     # Compute time delay (TDOA)
     hop_time = (window_samples - overlap_samples) / sr
@@ -732,8 +743,9 @@ def tdoa_cc2d(
     # Find max correlation value and its index
     cc_max = np.max(corr_fast)
 
-    ####  TESTING   ####
-    cc_max = corr_time[x_peak]
+    ####  TESTING   #### this goes with the collapsed-frequency correlation above ###
+    if cc2d_collapse == True:
+        cc_max = corr_time[x_peak]
     ####  TESTING   ####
 
     if return_trace:

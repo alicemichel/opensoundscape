@@ -35,6 +35,7 @@ class SpatialEvent:
         bandpass_range=None,
         cc_threshold=0,
         cc_filter=None,
+        cc2d_collapse=False,
         speed_of_sound=SPEED_OF_SOUND,
     ):
         """
@@ -99,6 +100,7 @@ class SpatialEvent:
         self.speed_of_sound = speed_of_sound
         self.window_samples = window_samples
         self.overlap_samples = overlap_samples
+        self.cc2d_collapse = cc2d_collapse
 
         # static attributes
         self.receiver_files = receiver_files
@@ -266,12 +268,12 @@ class SpatialEvent:
         bad_receivers_index = []
 
         for index, file in enumerate(self.receiver_files):
-            # for testing only - don't skip first file
-            # if index == 0:  # can skip reference audio cc with itself
-            #     tdoas.append(0)  # first file's delay to itself is zero
-            #     cc_maxs.append(1)  # set first file's cc_max to 1 (doesn't make sense for cc2d bc I didn't normalize the scores - need to do!)
-            #     corr_fasts.append(0)
-            #     continue
+            # for testing only - don't skip first file for cc2d only
+            if (self.cc_filter != 'cc2d') and (index == 0):  # skip reference audio cc with itself
+                tdoas.append(0)  # first file's delay to itself is zero
+                cc_maxs.append(1)  # set first file's cc_max to 1
+                #corr_fasts.append(0)
+                continue
 
             # use specified time offsets to extract the correct audio segment
             audio2 = Audio.from_file(
@@ -295,6 +297,7 @@ class SpatialEvent:
                     cc_filter=self.cc_filter,
                     return_cc_max=True,
                     return_trace=True,
+                    cc2d_collapse=self.cc2d_collapse,
                     skip_ref_bandpass=True,
                     window_samples=self.window_samples,
                     overlap_samples=self.overlap_samples,
@@ -305,7 +308,10 @@ class SpatialEvent:
 
 
         self.tdoas = np.array(tdoas)
-        self.cc_maxs = np.array(cc_maxs/max(cc_maxs))  # normalize cc_maxs to max value, should only change it for cc2d, since cc1d is already normalized
+        if self.cc_filter != 'cc2d':
+            self.cc_maxs = np.array(cc_maxs)  # cc1d is already normalized between 0 and 1
+        else:
+            self.cc_maxs = np.array(cc_maxs/cc_maxs[0])  # normalize cc_maxs to reference ARU, should only change it for cc2d, since cc1d is already normalized
         self.corr_fasts = corr_fasts
 
         # delete the bad receivers from this SpatialEvent
